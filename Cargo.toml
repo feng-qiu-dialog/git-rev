@@ -1,0 +1,7 @@
+[package]
+name = "git-rev"
+version = "0.1.0"
+authors = ["Feng Qiu <feng_qiu@dialog.com.au>"]
+
+[dependencies]
+handlebars = "0.25.0"
