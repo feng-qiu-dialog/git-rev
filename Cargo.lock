@@ -3,6 +3,7 @@ name = "git-rev"
 version = "0.1.0"
 dependencies = [
  "handlebars 0.25.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustc-serialize 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

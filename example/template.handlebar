@@ -1,0 +1,9 @@
+{
+    "revision": "{{ revision }}",
+    "branch": "{{ branch }}",
+    "tags": [
+        {{#each tags}}
+        "{{this}}"
+        {{/each}}
+    ]
+}
