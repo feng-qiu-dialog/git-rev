@@ -1,84 +1,55 @@
-extern crate handlebars;
+extern crate argparse;
+
+#[macro_use]
 extern crate git_rev;
 
-use std::env;
 use std::process;
-use std::io::Read;
 use std::io::Write;
-use std::fs::File;
 
-use handlebars::Handlebars;
+use argparse::ArgumentParser;
 
-use git_rev::exec::git_rev;
+use git_rev::{Opts, ExitStatus};
 
-static DEFAULT_TEMPLATE_NAME: &'static str = "DEFAULT_TEMPLATE";
+fn exit(exit_status: ExitStatus) {
+    match exit_status {
+        ExitStatus::Success => (),
+        _ => println_stderr!("{}", exit_status)
+    };
 
-macro_rules! println_stderr(
-    ($($arg:tt)*) => { {
-        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
-        r.expect("failed printing to stderr");
-    } }
-);
-
-fn main() {
-    let args = env::args().collect::<Vec<_>>();
-
-    if args.len() != 3 {
-        println_stderr!("USAGE: git-rev {{input-template}} {{output}}");
-        process::exit(1);
-    }
-
-    let ref input_file = args[1];
-    let ref output_file = args[2];
-
-    let git_rev = git_rev();
-
-    let mut handlebars = Handlebars::new();
-    setup_handlerbars(&mut handlebars, args[1].as_str());
-
-    match handlebars.render(DEFAULT_TEMPLATE_NAME, &git_rev) {
-        Err(e) => {
-            println_stderr!("Failed to render template {}.\n{}", input_file, e.desc);
-            process::exit(2);
-        },
-        Ok(rendered) => {
-            match File::create(args[2].as_str()) {
-                Err(e) => {
-                    println_stderr!("Failed to create {}.\n{}", output_file, e);
-                    process::exit(3);
-                },
-                Ok(mut file) => {
-                    match file.write_all(rendered.as_bytes()) {
-                        Err(e) => {
-                            println_stderr!("Failed to write to {}.\n{}", output_file, e);
-                            process::exit(3);
-                        },
-                        Ok(_) => (),
-                    }
-                }
-            }
-        }
-    }
-
-    process::exit(0);
+    process::exit(exit_status.exit_code());
 }
 
-fn setup_handlerbars(handlebars: &mut Handlebars, input: &str) {
-    match File::open(input) {
-        Err(e) => {
-            println_stderr!("Failed to open {}.\n{}", input, e);
-            process::exit(2);
-        },
-        Ok(mut file) => {
-            let mut content = String::new();
-            file.read_to_string(&mut content).unwrap();
-            match handlebars.register_template_string(DEFAULT_TEMPLATE_NAME, &content) {
-                Err(e) => {
-                    println_stderr!("Failed to register Template {}.\n{}", input, e.reason);
-                    process::exit(2);
-                },
-                Ok(_) => ()
-            }
-        }
+fn parse_args(args: &mut Opts) {
+    let mut parser = ArgumentParser::new();
+    parser.set_description("Render template with git info");
+
+    parser.refer(&mut args.template)
+        .add_argument("template", argparse::Store, "Path to the template file to render")
+        .required();
+    parser.refer(&mut args.output)
+        .add_argument("output", argparse::Store, "Path to the output file")
+        .required();
+
+    parser.refer(&mut args.tag_pattern)
+        .add_option(
+            &["-t", "--tag-pattern"], 
+            argparse::StoreOption, 
+            "Extra argument passed to 'git -l --points-at HEAD' to filter tags");
+
+    // parser.refer(&mut args.extra_vars)
+    //     .add_option(
+    //         &["-e", "--vars"], 
+    //         argparse::StoreOption, 
+    //         "JSON string which contains extra variables to be rendered");
+
+    parser.parse_args_or_exit();
+}
+
+fn main() {
+    let mut opts = Opts::new();
+    parse_args(&mut opts);
+    match git_rev::render_to_file(&opts) {
+        Ok(_) => (),
+        Err(e) => exit(ExitStatus::Error(e))
     }
 }

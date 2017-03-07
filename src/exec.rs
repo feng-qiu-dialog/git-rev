@@ -1,66 +1,59 @@
 use std::process::Command;
-use std::collections::BTreeMap;
-use rustc_serialize::json::{Json, ToJson};
 
-#[derive(Debug)]
-pub struct GitRev {
-    revision: String,
-    branch: String,
-    tags: Vec<String>,
+use super::{Error, GitInfo};
+
+pub fn git_info(tag_filter: &Option<String>) -> Result<GitInfo, Error> {
+    let rev = try!(git_rev_parse());
+    let branch = try!(git_branch());
+    let tags = try!(git_tags(tag_filter));
+
+    Ok(GitInfo {
+        revision: rev,
+        branch: branch,
+        tags: tags,
+    })
 }
 
-pub fn git_rev() -> GitRev {
-    GitRev {
-        revision: git_rev_parse(),
-        branch: git_branch(),
-        tags: git_tags(),
-    }
+fn command_output(command: &mut Command, raw_command: String) -> Result<String, Error> {
+    command.output()
+        .map_err(|e| Error::CommandError(raw_command, e))
+        .and_then(|output| {
+            String::from_utf8(output.stdout).map_err(|_| Error::CommandOutputParsingError)
+        })
+        .map(|output| output.trim().to_string())
 }
 
-impl ToJson for GitRev {
-    fn to_json(&self) -> Json {
-        let mut obj: BTreeMap<String, Json> = BTreeMap::new();
-        obj.insert("revision".to_string(), self.revision.to_json());
-        obj.insert("branch".to_string(), self.branch.to_json());
-        obj.insert("tags".to_string(), self.tags.to_json());
-        let result = Json::Object(obj);
-        result
-    }
+pub fn git_rev_parse() -> Result<String, Error> {
+    let mut command = Command::new("git");
+    command.arg("rev-parse").arg("HEAD");
+    command_output(&mut command, "git rev-parse HEAD".to_string())
 }
 
-pub fn git_rev_parse() -> String {
-    let output = Command::new("git").arg("rev-parse").arg("HEAD")
-        .output()
-        .ok()
-        .expect(r#"Failed to run "git rev-parse HEAD""#);
-    String::from_utf8(output.stdout)
-        .ok()
-        .expect("Failed to parse output of git command")
-        .trim().to_string()
+pub fn git_tags(filter: &Option<String>) -> Result<Vec<String>, Error> {
+    let mut command = Command::new("git");
+    command.arg("tag").arg("-l").arg("--points-at").arg("HEAD");
+    let mut raw_command = "git tag -l --points-at HEAD".to_string();
+
+    match *filter {
+        None => (),
+        Some(ref tag_pattern) => {
+            command.arg(tag_pattern.clone());
+            raw_command.push(' ');
+            raw_command.push_str(&tag_pattern);
+        }
+    };
+
+    command_output(&mut command, raw_command).map(|output| {
+        output
+            .split("\n")
+            .map(|line| line.trim().to_string())
+            .filter(|l| !l.is_empty())
+            .collect::<Vec<_>>()
+    })
 }
 
-pub fn git_tags() -> Vec<String> {
-    let output = Command::new("git").arg("tag").arg("-l").arg("--points-at").arg("HEAD")
-        .output()
-        .ok()
-        .expect(r#"Failed to run "git -l --points-at HEAD""#);
-    String::from_utf8(output.stdout)
-        .ok()
-        .expect("Failed to parse output of git command")
-        .trim()
-        .split("\n")
-        .map(|line| line.trim().to_string())
-        .filter(|l| !l.is_empty())
-        .collect::<Vec<_>>()
-}
-
-pub fn git_branch() -> String {
-    let output = Command::new("git").arg("rev-parse").arg("--abbrev-ref").arg("HEAD")
-        .output()
-        .ok()
-        .expect(r#"Failed to run "git rev-parse --abbrev-ref HEAD""#);
-    String::from_utf8(output.stdout)
-        .ok()
-        .expect("Failed to parse output of git command")
-        .trim().to_string()
+pub fn git_branch() -> Result<String, Error> {
+    let mut command = Command::new("git");
+    command.arg("rev-parse").arg("--abbrev-ref").arg("HEAD");
+    command_output(&mut command, "git rev-parse --abbrev-ref HEAD".to_string())
 }
