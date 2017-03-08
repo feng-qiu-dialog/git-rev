@@ -3,7 +3,6 @@ extern crate argparse;
 #[macro_use]
 extern crate git_rev;
 
-use std::env;
 use std::process;
 use std::io::Write;
 
@@ -53,8 +52,6 @@ fn parse_args(args: &mut Opts) {
 }
 
 fn main() {
-    let args = env::args_os().collect::<Vec<_>>();
-    println!("{:?}", args);
     let mut opts = Opts::new();
     parse_args(&mut opts);
     match git_rev::render_to_file(&opts) {

@@ -157,9 +157,7 @@ pub fn create_context(git_info: &GitInfo, extra_vars: Json) -> Context {
 fn add_env_vars_to_context(context: &mut Context) {
     let mut env = Context::new();
     for (key, value) in std::env::vars() {
-        let mut new_key = "ENV_".to_string();
-        new_key.push_str(&key);
-        env.insert(new_key, value.to_json());
+        env.insert(key, value.to_json());
     }
     context.insert("env".to_string(), Json::Object(env));
 }
@@ -202,7 +200,6 @@ fn parse_extra_vars(opt: &Option<String>) -> Result<Json, Error> {
     match *opt {
         None => Ok(Json::Object(Context::new())),
         Some(ref raw_json) => {
-            println!("{:?}", raw_json);
             Json::from_str(&raw_json)
                 .map_err(|e| Error::JsonError(JsonError::Error(e)))
                 .and_then(|obj: Json| {
