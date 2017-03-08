@@ -3,6 +3,7 @@ extern crate argparse;
 #[macro_use]
 extern crate git_rev;
 
+use std::env;
 use std::process;
 use std::io::Write;
 
@@ -36,16 +37,24 @@ fn parse_args(args: &mut Opts) {
             argparse::StoreOption, 
             "Extra argument passed to 'git -l --points-at HEAD' to filter tags");
 
-    // parser.refer(&mut args.extra_vars)
-    //     .add_option(
-    //         &["-e", "--vars"], 
-    //         argparse::StoreOption, 
-    //         "JSON string which contains extra variables to be rendered");
+    parser.refer(&mut args.debug)
+        .add_option(
+            &["-d", "--debug"], 
+            argparse::StoreTrue, 
+            "Turn on debug mode. Prints the context object fed into the template.");
+
+    parser.refer(&mut args.extra_vars)
+        .add_option(
+            &["-e", "--vars"], 
+            argparse::StoreOption, 
+            "JSON string which contains extra variables to be rendered");
 
     parser.parse_args_or_exit();
 }
 
 fn main() {
+    let args = env::args_os().collect::<Vec<_>>();
+    println!("{:?}", args);
     let mut opts = Opts::new();
     parse_args(&mut opts);
     match git_rev::render_to_file(&opts) {
