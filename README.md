@@ -1,9 +1,9 @@
 git-rev
 =======
 
-The `git-rev` is a command-line utitily to render template with git related info. It's inspired by the command SubWCRev
+The `git-rev` is a command-line utitily to render template with git related info. It's inspired by the command `SubWCRev` from TortoiseSVN.
 
-Handlerbar Template Engine
+Handlebar template engine
 --------------------------
 The utility uses handlebar as its template engine. For how to use handlebars, please check [handlebars-rust](https://github.com/sunng87/handlebars-rust).
 
@@ -52,7 +52,12 @@ Pass in extra variables
 ```
 REM In Windows Cmd
 git-rev template.hbs output -e "{ \"key\": \"value\" }"
-
+```
+```
+# In Windows Powershell
+git-rev template.hbs output -e '{ """key""": """value""" }'
+```
+```
 # In *NIX Shell
 git-rev template.hbs output -e '{ "key": "value" }'
 ```
@@ -61,7 +66,3 @@ Debug mode (prints out JSON object fed to the template)
 ```
 git-rev template.hbs output -d
 ```
-
-Known issues
-------------
-- In Powershell, passing JSON string as extra variables doesn't work. Powershell removes all double quotes.
