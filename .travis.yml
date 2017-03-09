@@ -1,0 +1,17 @@
+language: rust
+
+os:
+- linux
+
+script: cargo build --release
+
+#
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: KpS8xtkdFG8htGhkDD5cPIwwo+v+w990rZncoZWB1R/1aVZZWTBiMUwmRVOKKhWhyRN0U6JFpOYZGEelUxc/NMSttNBF15z5B6AfwsMB9WPhNOmUrSMGFW/uTYnaqLwFYs4e+Xecr8UyzLuu747QB3kbUNzg5HOfAz2sGKSE8m/fNt7oI3sCkCaUiU4jph3btkQhCPUqde43QAnpEHGaNlgndr/CGg3L3zyOJjmzdCk7SqWWxJ35749hsUsuwKPg8jayikR6+zFqsaWWnoqU+lTtdJUTPVKeDLLBRq8DIGrzmTqNSNACWGmgQqGG9DL6xXZVpmzw7cKXRklNy19rrfJk9FZXCkInAcQENtmiJ6uCE5uqOIBkf/gOLaBofKLZAxqrg71o+0U19tv0qetZceSHJZ42Q3xbvdQp1MosCx9SFqBNI+sdY3ussy+yxALto0OsMuHecT8VC+Wr6DKVuHHXCZsPD+HA4SYm2kIX5C3aPUfGVF14TbmUy5g9Q616ziPu4BJrTzl2pw3dmgNe2c5RnglFftAgapssTh9JQdkBEBG2ydpZFnEsrYfGOLmTUAZ0h0f8TSAXlU4/13/ZhET8AHs7XpUPxmVMCsjP0vn+pmb6jRR5gJ0Rdv+nX/P9+QhYeykQdVjA/QzdbuyEmaUqgsHRdLhVXR5sSIC3Hqc=
+#  file: target/release/git-rev
+#  skip_cleanup: true
+#  on:
+#    repo: feng-qiu-dialog/git-rev
+#    tags: true
