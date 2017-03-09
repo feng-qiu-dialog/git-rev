@@ -20,6 +20,8 @@ macro_rules! println_stderr(
     } }
 );
 
+pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+
 #[derive(Debug)]
 pub struct Opts {
     pub template: String,
@@ -27,6 +29,7 @@ pub struct Opts {
     pub tag_pattern: Option<String>,
     pub extra_vars: Option<String>,
     pub debug: bool,
+    pub show_version: bool,
 }
 
 impl Opts {
@@ -37,6 +40,7 @@ impl Opts {
             tag_pattern: Option::None,
             extra_vars: Option::None,
             debug: false,
+            show_version: false,
         }
     }
 }

@@ -23,6 +23,9 @@ fn parse_args(args: &mut Opts) {
     let mut parser = ArgumentParser::new();
     parser.set_description("Render template with git info");
 
+    parser.add_option(&["-V", "--version"],
+        argparse::Print(git_rev::VERSION.to_string()), "Show version");
+
     parser.refer(&mut args.template)
         .add_argument("template", argparse::Store, "Path to the template file to render")
         .required();
