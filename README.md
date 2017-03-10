@@ -40,29 +40,29 @@ Example template file.
 
 Basic usage
 ```
-git-rev template.hbs output 
+git-rev template.hbs -o output 
 ```
 
 Filter tags
 ```
-git-rev -t v* template.hbs output
+git-rev -t v* template.hbs -o output
 ```
 
 Pass in extra variables
 ```
 REM In Windows Cmd
-git-rev template.hbs output -e "{ \"key\": \"value\" }"
+git-rev template.hbs -o output -e "{ \"key\": \"value\" }"
 ```
 ```
 # In Windows Powershell
-git-rev template.hbs output -e '{ """key""": """value""" }'
+git-rev template.hbs -o output -e '{ """key""": """value""" }'
 ```
 ```
 # In *NIX Shell
-git-rev template.hbs output -e '{ "key": "value" }'
+git-rev template.hbs -o output -e '{ "key": "value" }'
 ```
 
 Debug mode (prints out JSON object fed to the template)
 ```
-git-rev template.hbs output -d
+git-rev template.hbs -o output -d
 ```
