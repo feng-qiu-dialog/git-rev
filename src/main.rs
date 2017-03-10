@@ -29,9 +29,12 @@ fn parse_args(args: &mut Opts) {
     parser.refer(&mut args.template)
         .add_argument("template", argparse::Store, "Path to the template file to render")
         .required();
+
     parser.refer(&mut args.output)
-        .add_argument("output", argparse::Store, "Path to the output file")
-        .required();
+        .add_option(
+            &["-o", "--output"],
+            argparse::StoreOption, 
+            "Path to the output file");
 
     parser.refer(&mut args.tag_pattern)
         .add_option(

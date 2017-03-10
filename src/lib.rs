@@ -25,7 +25,7 @@ pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 #[derive(Debug)]
 pub struct Opts {
     pub template: String,
-    pub output: String,
+    pub output: Option<String>,
     pub tag_pattern: Option<String>,
     pub extra_vars: Option<String>,
     pub debug: bool,
@@ -36,9 +36,9 @@ impl Opts {
     pub fn new() -> Opts {
         Opts {
             template: String::new(),
-            output: String::new(),
-            tag_pattern: Option::None,
-            extra_vars: Option::None,
+            output: None,
+            tag_pattern: None,
+            extra_vars: None,
             debug: false,
             show_version: false,
         }
@@ -51,7 +51,7 @@ pub enum Error {
     CommandOutputParsingError,
     TemplateError(TemplateError),
     OutputError(std::io::Error),
-    JsonError(self::JsonError),
+    JsonError(JsonError),
 }
 
 #[derive(Debug)]
@@ -191,13 +191,11 @@ pub fn render_context(context: Context, opts: &Opts) -> Result<String, Error> {
         })
 }
 
-pub fn render_context_to_file(context: Context, opts: &Opts) -> Result<String, Error> {
-    render_context(context, opts).and_then(|rendered| {
-        File::create(&opts.output)
-            .map(|mut file| file.write_all(rendered.as_bytes()))
-            .map_err(|e| Error::OutputError(e))
-            .map(|_| rendered)
-    })
+fn write_string_to_file(content: String, path: &str) -> Result<String, Error> {
+    File::create(path)
+        .map(|mut file| file.write_all(content.as_bytes()))
+        .map_err(|e| Error::OutputError(e))
+        .map(|_| content)
 }
 
 fn parse_extra_vars(opt: &Option<String>) -> Result<Json, Error> {
@@ -222,7 +220,21 @@ pub fn render_to_file(opts: &Opts) -> Result<String, Error> {
     let extra_vars = try!(parse_extra_vars(&opts.extra_vars));
     let context = create_context(&info, extra_vars);
     if opts.debug {
-        print!("{}", context.to_json());
+        print!("{}", json::as_pretty_json(&context));
     }
-    render_context_to_file(context, opts)
+
+    render_context(context, opts)
+        .and_then(|rendered| {
+            match opts.output {
+                Some(ref output) => write_string_to_file(rendered, &output),
+                None => {
+                    if opts.debug {
+                        println!("\n\n{:#<1$}\n{2}", "#", 80, rendered);
+                    } else {
+                        println!("{}", rendered);
+                    }
+                    Ok(rendered)
+                },
+            }
+        })
 }
