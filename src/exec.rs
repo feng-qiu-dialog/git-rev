@@ -16,7 +16,7 @@ pub fn git_info(tag_filter: &Option<String>, short: &Option<usize>) -> Result<Gi
     })
 }
 
-fn command_output(command: &mut Command, raw_command: String) -> Result<String, Error> {
+pub fn command_output(command: &mut Command, raw_command: String) -> Result<String, Error> {
     command.output()
         .map_err(|e| Error::CommandError(raw_command, e))
         .and_then(|output| {

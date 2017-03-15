@@ -2,6 +2,7 @@ extern crate handlebars;
 extern crate rustc_serialize;
 
 pub mod exec;
+mod hbs_helper;
 
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -174,8 +175,13 @@ fn add_extra_vars_to_context(context: &mut Context, extra_vars: Json) {
     context.insert("extra".to_string(), extra_vars);
 }
 
+fn setup_handlebars(handlebars: &mut Handlebars) {
+    handlebars.register_helper("git_log_format", Box::new(hbs_helper::git_log_fmt_helper));
+}
+
 pub fn render_context(context: Context, opts: &Opts) -> Result<String, Error> {
     let mut handlebars = Handlebars::new();
+    setup_handlebars(&mut handlebars);
     File::open(&opts.template)
         .map_err(|e| Error::TemplateError(TemplateError::IOError(e)))
         .and_then(|mut file| {
