@@ -54,6 +54,12 @@ fn parse_args(args: &mut Opts) {
             argparse::StoreOption, 
             "JSON string which contains extra variables to be rendered");
 
+    parser.refer(&mut args.short)
+        .add_option(
+            &["-s", "--short"], 
+            argparse::StoreOption, 
+            "Length of short version of SHA1 commit hash. Without this defined, git's default would be used.");
+
     parser.parse_args_or_exit();
 }
 

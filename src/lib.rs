@@ -30,6 +30,7 @@ pub struct Opts {
     pub extra_vars: Option<String>,
     pub debug: bool,
     pub show_version: bool,
+    pub short: Option<usize>,
 }
 
 impl Opts {
@@ -41,6 +42,7 @@ impl Opts {
             extra_vars: None,
             debug: false,
             show_version: false,
+            short: None,
         }
     }
 }
@@ -129,6 +131,7 @@ pub type Context = BTreeMap<String, Json>;
 #[derive(Debug)]
 pub struct GitInfo {
     revision: String,
+    rev_short: String,
     branch: String,
     tags: Vec<String>,
 }
@@ -137,6 +140,7 @@ impl GitInfo {
     fn to_context(&self) -> Context {
         let mut obj = Context::new();
         obj.insert("revision".to_string(), self.revision.to_json());
+        obj.insert("rev_short".to_string(), self.rev_short.to_json());
         obj.insert("branch".to_string(), self.branch.to_json());
         obj.insert("tags".to_string(), self.tags.to_json());
         obj
@@ -216,7 +220,7 @@ fn parse_extra_vars(opt: &Option<String>) -> Result<Json, Error> {
 }
 
 pub fn render_to_file(opts: &Opts) -> Result<String, Error> {
-    let info = try!(exec::git_info(&opts.tag_pattern));
+    let info = try!(exec::git_info(&opts.tag_pattern, &opts.short));
     let extra_vars = try!(parse_extra_vars(&opts.extra_vars));
     let context = create_context(&info, extra_vars);
     if opts.debug {
