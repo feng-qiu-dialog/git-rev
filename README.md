@@ -19,12 +19,12 @@ You can also pass in extra variables and access them through `extra` object.
 
 E.g. to put the extra variable `extra_var` into template, you can write `{{ extra.extra_var }}`.
 
-Handlerbar helper
+Handlebar helper
 -----------------
 A handlebar helper `git_log_format` is defined to help you get some more information out of git log.
-git_log_format passes argument to git log like this `git log -1 --format={ YOUR ARGUMENTS }`. 
+`git_log_format` passes argument to git log like this `git log -1 --format={ YOUR ARGUMENTS }`. 
 
-For more information on format, please check the [format](https://git-scm.com/docs/pretty-formats).
+For more information on format, please check [here](https://git-scm.com/docs/pretty-formats).
 
 Examples
 --------
@@ -36,7 +36,7 @@ Example template file.
     "revision": "{{ revision }}",
     "rev_short": "{{ rev_short }}",
     "branch": "{{ branch }}",
-    "commit_date": "{{ git_log_format "%ai" }}",
+    "commit_date": "{{ git_log_format "%aI" }}",
     "tag": "{{ tags.0 }}",
     "tags": [
         {{#each tags}}
