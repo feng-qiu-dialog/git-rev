@@ -51,10 +51,36 @@ impl Opts {
 #[derive(Debug)]
 pub enum Error {
     CommandError(String, std::io::Error),
+    CommandFailure(String, String),
     CommandOutputParsingError,
     TemplateError(TemplateError),
     OutputError(std::io::Error),
     JsonError(JsonError),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            Error::CommandFailure(ref command, ref details) => {
+                write!(f, "Failed to run command '{}'.\n{}", command, details)
+            },
+            Error::CommandError(ref command, ref e) => {
+                write!(f, "Failed to run command '{}'. {}", command, e)
+            },
+            Error::CommandOutputParsingError => {
+                write!(f, "Failed to parse command output")
+            },
+            Error::TemplateError(ref e) => {
+                write!(f, "Failed to render template. {}", e)
+            },
+            Error::OutputError(ref e) => {
+                write!(f, "Failed to write the output. {}", e)
+            },
+            Error::JsonError(ref e) => {
+                write!(f, "Failed to parse extra vars. {}", e)
+            },
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -108,20 +134,8 @@ impl std::fmt::Display for ExitStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
             ExitStatus::Success => write!(f, ""),
-            ExitStatus::Error(Error::CommandError(ref command, ref e)) => {
-                write!(f, "Failed to run command '{}'. {}", command, e)
-            },
-            ExitStatus::Error(Error::CommandOutputParsingError) => {
-                write!(f, "Failed to parse command output")
-            },
-            ExitStatus::Error(Error::TemplateError(ref e)) => {
-                write!(f, "Failed to render template. {}", e)
-            },
-            ExitStatus::Error(Error::OutputError(ref e)) => {
-                write!(f, "Failed to write the output. {}", e)
-            },
-            ExitStatus::Error(Error::JsonError(ref e)) => {
-                write!(f, "Failed to parse extra vars. {}", e)
+            ExitStatus::Error(ref e) => {
+                write!(f, "{}", e)
             },
         }
     }
@@ -176,7 +190,7 @@ fn add_extra_vars_to_context(context: &mut Context, extra_vars: Json) {
 }
 
 fn setup_handlebars(handlebars: &mut Handlebars) {
-    handlebars.register_helper("git_log_format", Box::new(hbs_helper::git_log_fmt_helper));
+    handlebars.register_helper(hbs_helper::HBS_HELPER_GIT_LOG_FMT, Box::new(hbs_helper::git_log_fmt_helper));
 }
 
 pub fn render_context(context: Context, opts: &Opts) -> Result<String, Error> {

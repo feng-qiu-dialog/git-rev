@@ -18,9 +18,15 @@ pub fn git_info(tag_filter: &Option<String>, short: &Option<usize>) -> Result<Gi
 
 pub fn command_output(command: &mut Command, raw_command: String) -> Result<String, Error> {
     command.output()
-        .map_err(|e| Error::CommandError(raw_command, e))
+        .map_err(|e| Error::CommandError(raw_command.clone(), e))
         .and_then(|output| {
-            String::from_utf8(output.stdout).map_err(|_| Error::CommandOutputParsingError)
+            if output.status.success() {
+                String::from_utf8(output.stdout).map_err(|_| Error::CommandOutputParsingError)
+            } else {
+                String::from_utf8(output.stderr)
+                    .map_err(|_| Error::CommandOutputParsingError)
+                    .and_then(|output_stderr| Err(Error::CommandFailure(raw_command, output_stderr)))
+            }
         })
         .map(|output| output.trim().to_string())
 }

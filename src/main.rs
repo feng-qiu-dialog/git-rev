@@ -21,32 +21,32 @@ fn exit(exit_status: ExitStatus) {
 
 fn parse_args(args: &mut Opts) {
     let mut parser = ArgumentParser::new();
-    parser.set_description("Render template with git info");
+    parser.set_description("render template with git info");
 
     parser.add_option(&["-V", "--version"],
-        argparse::Print(git_rev::VERSION.to_string()), "Show version");
+        argparse::Print(git_rev::VERSION.to_string()), "show version and exit");
 
     parser.refer(&mut args.template)
-        .add_argument("template", argparse::Store, "Path to the template file to render")
+        .add_argument("template", argparse::Store, "path to the template file to render")
         .required();
 
     parser.refer(&mut args.output)
         .add_option(
             &["-o", "--output"],
             argparse::StoreOption, 
-            "Path to the output file");
+            "path to the output file");
 
     parser.refer(&mut args.tag_pattern)
         .add_option(
             &["-t", "--tag-pattern"], 
             argparse::StoreOption, 
-            "Extra argument passed to 'git -l --points-at HEAD' to filter tags");
+            "extra argument passed to 'git -l --points-at HEAD' to filter tags");
 
     parser.refer(&mut args.debug)
         .add_option(
             &["-d", "--debug"], 
             argparse::StoreTrue, 
-            "Turn on debug mode. Prints the context object fed into the template.");
+            "turn on debug mode, it prints the context object fed into the template");
 
     parser.refer(&mut args.extra_vars)
         .add_option(
@@ -58,7 +58,7 @@ fn parse_args(args: &mut Opts) {
         .add_option(
             &["-s", "--short"], 
             argparse::StoreOption, 
-            "Length of short version of SHA1 commit hash. Without this defined, git's default would be used.");
+            "length of short version of SHA1 commit hash. without this defined, git's default would be used.");
 
     parser.parse_args_or_exit();
 }
