@@ -3,17 +3,12 @@ use std::process::Command;
 use super::{Error, GitInfo};
 
 pub fn git_info(tag_filter: &Option<String>, short: &Option<usize>) -> Result<GitInfo, Error> {
-    let rev = try!(git_rev_parse());
-    let rev_short = try!(git_rev_parse_short(short));
-    let branch = try!(git_branch());
-    let tags = try!(git_tags(tag_filter));
+    let rev = git_rev_parse()?;
+    let rev_short = git_rev_parse_short(short)?;
+    let branch = git_branch()?;
+    let tags = git_tags(tag_filter)?;
 
-    Ok(GitInfo {
-        revision: rev,
-        rev_short: rev_short,
-        branch: branch,
-        tags: tags,
-    })
+    Ok(GitInfo { revision: rev, rev_short, branch, tags })
 }
 
 pub fn command_output(command: &mut Command, raw_command: String) -> Result<String, Error> {
@@ -41,8 +36,8 @@ pub fn git_rev_parse_short(short: &Option<usize>) -> Result<String, Error> {
     let mut command = Command::new("git");
     command.arg("rev-parse");
     match *short {
-        None => { command.arg("--short"); },
-        Some(ref short_len) => { command.arg(format!("--short={}", short_len)); },
+        None => { command.arg("--short"); }
+        Some(ref short_len) => { command.arg(format!("--short={}", short_len)); }
     }
     command.arg("HEAD");
     command_output(&mut command, "git rev-parse --short HEAD".to_string())

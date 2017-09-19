@@ -23,7 +23,7 @@ pub fn git_log_fmt_helper(helper: &Helper,
                     match output {
                         Err(e) => Err(RenderError::new(format!("{}", e))),
                         Ok(output) => {
-                            try!(context.writer.write(output.into_bytes().as_ref()));
+                            context.writer.write(output.into_bytes().as_ref())?;
                             Ok(())
                         },
                     }

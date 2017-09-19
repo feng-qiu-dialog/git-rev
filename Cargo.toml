@@ -1,7 +1,7 @@
 [package]
 name = "git-rev"
-version = "0.5.1"
-authors = ["Feng Qiu <feng_qiu@dialog.com.au>"]
+version = "0.5.2"
+authors = ["Feng Qiu <feng.qiu@ossa-it.com>"]
 
 [dependencies]
 argparse = "*"

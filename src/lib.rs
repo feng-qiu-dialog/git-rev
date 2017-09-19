@@ -102,14 +102,14 @@ impl std::fmt::Display for TemplateError {
 
 #[derive(Debug)]
 pub enum JsonError {
-    NotOject,
+    NotObject,
     Error(json::ParserError),
 }
 
 impl std::fmt::Display for JsonError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
-            JsonError::NotOject => write!(f, "JSON Object expected"),
+            JsonError::NotObject => write!(f, "JSON Object expected"),
             JsonError::Error(ref e) => write!(f, "{}", e),
         }
     }
@@ -232,7 +232,7 @@ fn parse_extra_vars(opt: &Option<String>) -> Result<Json, Error> {
                     if obj.is_object() {
                         Ok(obj)
                     } else {
-                        Err(Error::JsonError(JsonError::NotOject))
+                        Err(Error::JsonError(JsonError::NotObject))
                     }
                 })
         }
@@ -240,8 +240,8 @@ fn parse_extra_vars(opt: &Option<String>) -> Result<Json, Error> {
 }
 
 pub fn render_to_file(opts: &Opts) -> Result<String, Error> {
-    let info = try!(exec::git_info(&opts.tag_pattern, &opts.short));
-    let extra_vars = try!(parse_extra_vars(&opts.extra_vars));
+    let info = exec::git_info(&opts.tag_pattern, &opts.short)?;
+    let extra_vars = parse_extra_vars(&opts.extra_vars)?;
     let context = create_context(&info, extra_vars);
     if opts.debug {
         print!("{}", json::as_pretty_json(&context));
